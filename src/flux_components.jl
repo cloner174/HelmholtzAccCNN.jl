@@ -1,3 +1,8 @@
+pu = cpu # gpu
+r_type = Float64
+gmres_type = ComplexF64
+a_type = Array{gmres_type}
+c_type = ComplexF64
 
 smooth_up_filter = r_type.( reshape((1/4) * [1 2 1;2 4.0 2;1 2 1],3,3,1,1))
 smooth_down_filter =r_type.( reshape((1/16) * [1 2 1;2 4 2;1 2 1],3,3,1,1))
@@ -24,10 +29,10 @@ block_laplacian_filter = block_filter!(3, laplacian_filter, 2)
 up = ConvTranspose(smooth_up_filter, r_type.([0.0]), stride=2)|> pu
 down = Conv(smooth_down_filter, r_type.([0.0]), stride=2)|> pu
 
-block_up = ConvTranspose(block_filter!(3, smooth_up_filter, 2), r_type.([0.0]), stride=2)
-block_down = Conv(block_filter!(3, smooth_down_filter, 2), r_type.([0.0]), stride=2)
+block_up = ConvTranspose(block_filter!(3, smooth_up_filter, 2), r_type.([0.0,0.0]), stride=2)
+block_down = Conv(block_filter!(3, smooth_down_filter, 2), r_type.([0.0,0.0]), stride=2)
 
-i_conv = Conv(block_filter!(1, reshape([1.0],1,1,1,1), 2),r_type.([0.0]))|> pu
+i_conv = Conv(block_filter!(1, reshape([1.0],1,1,1,1), 2),r_type.([0.0,0.0]))|> pu
 
 function laplacian_conv!(grid; h= 1)
     filter = r_type.((1.0 / (h^2)) * laplacian_filter)

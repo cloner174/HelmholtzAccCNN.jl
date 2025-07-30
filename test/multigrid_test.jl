@@ -34,7 +34,7 @@ gamma = absorbing_layer!(gamma, pad_cells, omega);
 # V cycle
 
 x = x0 = zeros(ComplexF64,n-1,n-1)
-x = fgmres_v_cycle_helmholtz!(n, h, b, kappa, omega, gamma; restrt=30, maxIter=1)
+x = fgmres_v_cycle_helmholtz!(n, n, h, b, kappa, omega, gamma; restrt=30, maxIter=1)
 
 v1_iter = 1
 v2_iter = 20
@@ -54,7 +54,7 @@ if use_gmres == 1
         v = reshape(v, n-1, n-1)
         x = zeros(ComplexF64,n-1,n-1)
         for i = 1:iterations
-            x, = v_cycle_helmholtz!(n, h, x, v, kappa, omega, gamma; u=1,
+            x, = v_cycle_helmholtz!(n,n, h, x, v, kappa, omega, gamma; u=1,
                     v1_iter = v1_iter, v2_iter = v2_iter, alpha=0.5, log = 0, level = level)
         end
         return vec(x)
@@ -72,7 +72,7 @@ else
     res = zeros(n-1,n-1)
     bnorm = norm(b)
     for i = 1:v_cycle_iter
-        global x, helmholtz_matrix = v_cycle_helmholtz!(n, h, x, b, kappa, omega, gamma; u = 1,
+        global x, helmholtz_matrix = v_cycle_helmholtz!(n,n, h, x, b, kappa, omega, gamma; u = 1,
                                         v1_iter = v1_iter, v2_iter = v2_iter, alpha=0.5, log = 0, level = level)
         global res = helmholtz_chain!(reshape(x, n-1, n-1, 1, 1), helmholtz_matrix; h=h)
         residual[i] = norm(b .- res[:,:,1,1]) / bnorm
@@ -85,6 +85,11 @@ q=M(vec(b))
 
 heatmap(reshape(real(q),n-1,n-1), color=:grays)
 print(residual)
+
+results_dir = "test/multigrid_helmholtz/results"
+if !isdir(results_dir)
+    mkpath(results_dir)
+end
 
 iter = range(1, length=length(residual), iterations*length(residual))
 p = plot(iter,residual,label="V cycle")
