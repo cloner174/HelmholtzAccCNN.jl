@@ -1,8 +1,18 @@
-pu = cpu # gpu
-r_type = Float64
-gmres_type = ComplexF64
-a_type = Array{gmres_type}
-c_type = ComplexF64
+using CUDA
+using Flux
+using Distributions
+#pu = gpu                 # Use the GPU
+#r_type = Float32         # Use 32-bit floats for performance on GPU
+#gmres_type = ComplexF32  # Complex version of 32-bit float
+#a_type = CuArray{gmres_type} # Use CUDA arrays for GPU data
+#c_type = ComplexF32      # Complex version of 32-bit float
+pu = cpu                 # Use the CPU
+r_type = Float64         # Use 64-bit floats for precision on CPU
+gmres_type = ComplexF64  # Complex version of 64-bit float
+a_type = Array{gmres_type}   # Use standard Julia arrays
+c_type = ComplexF64      # Complex version of 64-bit float
+u_type = Float64
+cgpu = pu
 
 smooth_up_filter = r_type.( reshape((1/4) * [1 2 1;2 4.0 2;1 2 1],3,3,1,1))
 smooth_down_filter =r_type.( reshape((1/16) * [1 2 1;2 4 2;1 2 1],3,3,1,1))

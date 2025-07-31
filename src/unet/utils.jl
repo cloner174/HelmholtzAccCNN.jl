@@ -1,6 +1,7 @@
+using Distributions
 
 function _random_normal(shape...)
-  return u_type.(rand(Normal(0.f0,0.02f0),shape...))|> gpu
+  return u_type.(rand(Normal(0.f0,0.02f0),shape...))|> cgpu
 end
 
 function extract_bboxes(mask)

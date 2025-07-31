@@ -180,6 +180,7 @@ function absorbing_layer!(gamma::Array,pad,ABLamp;NeumannAtFirstDim=false)
     return gamma
 end
 
+using KrylovMethods
 fgmres_func = KrylovMethods.fgmres
 
 function fgmres_v_cycle_helmholtz!(n, m, h, b, kappa, omega, gamma; restrt=30, maxIter=10)
