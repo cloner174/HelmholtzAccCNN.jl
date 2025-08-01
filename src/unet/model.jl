@@ -708,7 +708,7 @@ function FeaturesUNet(in_chs, k_chs, s_model, k_model; kernel = (3, 3), indexes=
 end
 
 function (u::FeaturesUNet)(x::AbstractArray)
-    kappa = reshape(x[:,:,3:u.indexes,1], size(x)[1], size(x)[1], u.indexes-2, 1)
+    kappa = reshape(x[:,:,3:u.indexes,1], size(x)[1], size(x)[2], u.indexes-2, 1)
     features = u.kappa_subnet(kappa)
     u.solve_subnet(x, features)
 end
