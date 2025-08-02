@@ -1,0 +1,10 @@
+index.ipynb
+initial_base_model_16_55_51 loss.csv
+main_logs.txt
+main2.ipynb
+main2.jl
+MarmousiModelWithoutPad.dat
+data/
+results/
+new_method*.jl
+models/

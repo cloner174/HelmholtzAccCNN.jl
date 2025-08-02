@@ -183,22 +183,60 @@ end
 using KrylovMethods
 fgmres_func = KrylovMethods.fgmres
 
-function fgmres_v_cycle_helmholtz!(n, m, h, b, kappa, omega, gamma; restrt=30, maxIter=10)
-    shifted_laplacian_matrix, helmholtz_matrix = get_helmholtz_matrices!(kappa, omega, gamma; alpha=0.5)
-    A(v) = vec(helmholtz_chain!(reshape(real(v), n-1, m-1, 1, 1), helmholtz_matrix; h=h) + im*helmholtz_chain!(reshape(imag(v), n-1, m-1, 1, 1), helmholtz_matrix; h=h)) # vec(helmholtz_chain!(reshape(v, n-1, n-1, 1, 1), helmholtz_matrix; h=h))
-    function M(v)
-        v = reshape(v, n-1, m-1)
-        x = zeros(gmres_type,n-1,m-1)|>pu
-        x, = v_cycle_helmholtz!(n, m, h, x, v, kappa, omega, gamma; u=1,
-                    v1_iter = 1, v2_iter = 20, alpha=0.5, log = 0, level = 3)
-        return vec(x)
-    end
-    x = zeros(gmres_type,n-1,m-1)|>pu
-    x,flag,err,iter,resvec = fgmres_func(A, vec(b), restrt, tol=1e-30, maxIter=maxIter,
-                                                    M=M, x=vec(x), out=-1, flexible=true)
+function fgmres_v_cycle_helmholtz!(n, m, h, b, kappa, omega, gamma; restrt=30, maxIter=10, M=nothing)
+    
+    num_sources = size(b, 4)
+    x_solution = similar(b)
+    
+    # --- Loop over each source ---
+    for i in 1:num_sources
+        b_single = b[:,:,1,i]
+        
+        shifted_laplacian_matrix, helmholtz_matrix = get_helmholtz_matrices!(kappa, omega, gamma; alpha=0.5)
+        
+        A(v) = vec(helmholtz_chain!(reshape(real(v), n-1, m-1, 1, 1), helmholtz_matrix; h=h) + im*helmholtz_chain!(reshape(imag(v), n-1, m-1, 1, 1), helmholtz_matrix; h=h))
 
-    return reshape(x, n-1, m-1)
+        # --- Use the provided preconditioner M if it exists ---
+        local_M = M
+        if local_M === nothing
+            # Define the default internal preconditioner if none is provided
+            function default_M(v)
+                v_reshaped = reshape(v, n-1, m-1)
+                x_initial = zeros(gmres_type, n-1, m-1) |> pu
+                x, = v_cycle_helmholtz!(n, m, h, x_initial, v_reshaped, kappa, omega, gamma; u=1, v1_iter=1, v2_iter=20, alpha=0.5, log=0, level=3)
+                return vec(x)
+            end
+            local_M = default_M
+        end
+
+        x_initial = zeros(gmres_type, n-1, m-1) |> pu
+        
+        x_final, flag, err, iter, resvec = fgmres_func(A, vec(b_single), restrt, tol=1e-6, maxIter=maxIter,
+                                             M=local_M, x=vec(x_initial), out=-1, flexible=true)
+
+        x_solution[:,:,1,i] = reshape(x_final, n-1, m-1)
+    end
+
+    # Return the solution for all sources, and a dummy resvec for compatibility
+    return x_solution, [0.0] 
 end
+
+#function fgmres_v_cycle_helmholtz!(n, m, h, b, kappa, omega, gamma; restrt=30, maxIter=10)
+#    shifted_laplacian_matrix, helmholtz_matrix = get_helmholtz_matrices!(kappa, omega, gamma; alpha=0.5)
+#    A(v) = vec(helmholtz_chain!(reshape(real(v), n-1, m-1, 1, 1), helmholtz_matrix; h=h) + im*helmholtz_chain!(reshape(imag(v), n-1, m-1, 1, 1), helmholtz_matrix; h=h)) # vec(helmholtz_chain!(reshape(v, n-1, n-1, 1, 1), helmholtz_matrix; h=h))
+#    function M(v)
+#        v = reshape(v, n-1, m-1)
+#        x = zeros(gmres_type,n-1,m-1)|>pu
+#        x, = v_cycle_helmholtz!(n, m, h, x, v, kappa, omega, gamma; u=1,
+#                    v1_iter = 1, v2_iter = 20, alpha=0.5, log = 0, level = 3)
+#        return vec(x)
+#    end
+#    x = zeros(gmres_type,n-1,m-1)|>pu
+#    x,flag,err,iter,resvec = fgmres_func(A, vec(b), restrt, tol=1e-30, maxIter=maxIter,
+#                                                    M=M, x=vec(x), out=-1, flexible=true)
+#
+#    return reshape(x, n-1, m-1)
+#end
 
 # not in use:
 # function v_cycle_helmholtz_unet!(model, n, h, x, b, kappa, omega, gamma; u = 1, v1_iter = 1, v2_iter = 10, use_gmres_alpha = 0, alpha= 0.5, log = 0, level = nothing)

@@ -1,4 +1,5 @@
 include("../../src/unet/utils.jl")
+using Functors
 
 function BatchNormWrap(out_ch)
     Chain(x->expand_dims(x,2)|>cgpu,
