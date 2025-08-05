@@ -23,7 +23,7 @@ end
 
 (u::UNetUpBlock)(input, bridge) = cat(u.upsample(input), bridge, dims = 3)
 
-@functor UNetUpBlock
+#@functor UNetUpBlock
 
 UNetUpBlock(in_chs::Int, out_chs::Int; kernel = (5, 5), p = 0.5f0, σ=elu) =
     UNetUpBlock(Chain(x->(σ == elu ? σ.(x,0.2f0) : σ.(x)),

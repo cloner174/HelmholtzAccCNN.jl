@@ -40,7 +40,7 @@ fgmres_func = KrylovMethods.fgmres # gpu_flexible_gmres #
 
 function test_train_unet!(n, f, opt, init_lr, train_size, test_size, batch_size, iterations;
                                     is_save=false, data_augmentetion=false, e_vcycle_input=false,
-                                    kappa_type=1, threshold=50, kappa_input=true, kappa_smooth=false, k_kernel=3,
+                                    kappa_type=7, threshold=50, kappa_input=true, kappa_smooth=false, k_kernel=3,
                                     gamma_input=true, kernel=(3,3), smaller_lr=10, v2_iter=10, level=3,
                                     axb=false, norm_input=false, model_type=SUnet, k_type=NaN, resnet_type=SResidualBlock, k_chs=-1, indexes=3, data_path="", full_loss=false, residual_loss=false, gmres_restrt=1, σ=elu, arch=1)
 
@@ -125,7 +125,7 @@ gmres_restrt = -1 # 1 -Default, 5 - 5GMRES, -1 Random
 test_train_unet!(128, 10.0, opt, init_lr, train_size, test_size, batch_size, iterations;
                     data_augmentetion = false,
                     e_vcycle_input = false,
-                    kappa_type = 1,
+                    kappa_type = 7,
                     kappa_input = true,
                     threshold = 25,
                     kappa_smooth = true,

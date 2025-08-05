@@ -20,7 +20,7 @@ else
     cgpu = cpu
     pyplot()
 end
-
+ 
 pu = cpu # gpu
 r_type = Float64
 c_type = ComplexF64
@@ -62,7 +62,7 @@ indexes = 3
 σ = elu
 kernel = (3,3)
 e_vcycle_input = false
-kappa_type = 4 # 0 - uniform, 1 - CIFAR10, 2 - STL10
+kappa_type = 7 # 0 - uniform, 1 - CIFAR10, 2 - STL10
 kappa_threshold = 25 # kappa ∈ [0.01*threshold, 1]
 kappa_input = true
 gamma_input = true

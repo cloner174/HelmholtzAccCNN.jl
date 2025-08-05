@@ -11,7 +11,7 @@ r_type = Float64         # Use 64-bit floats for precision on CPU
 gmres_type = ComplexF64  # Complex version of 64-bit float
 a_type = Array{gmres_type}   # Use standard Julia arrays
 c_type = ComplexF64      # Complex version of 64-bit float
-u_type = Float64
+u_type = r_type
 cgpu = pu
 
 smooth_up_filter = r_type.( reshape((1/4) * [1 2 1;2 4.0 2;1 2 1],3,3,1,1))
